@@ -102,3 +102,8 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# my very own ignored files and folders for this project
+data/
+out/
+
