@@ -1,0 +1,18 @@
+---
+ NAME: Experiment_01                                    # EXPERIMENT NAME
+ TrainData: Data/GCM_Training_TRN.arff                  # DATA USED FOR TRAINING CLASSIFIER
+ TestData: Data/GCM_Training_TST.arff                   # DATA USED FOR TESTING CLASSIFIER
+ ValidationData: Data/GCM_Test.arff                     # DATA USED FOR VALIDATE CLASSIFIER
+ NCORES: 6                                              # NUMBER OF CORES
+ Nindiv: 100                                            # POPULATION SIZE
+ K: 4                                                   # NUMBER OF INDIVIDUALS FOR TOURNAMENT
+ maxIterations: 500                                     # MAXIMUM NUMBER OF ITERATIONS
+ alpha: 0.65                                            # PESO DEL "UAR" EN LA FUNCION DE FITNESS
+ Np2x: 29                                               # NUMBER OF PARENTS TO CROSS
+ Nchild: 99                                             # OFFSPRING SIZE
+ pF: 0.10                                               # PROBABILITY OF INCLUDE EACH FEATURE IN THE INITIALIZATION
+ px: 0.85                                               # CROSSOVER PROBABILITY
+ pm: 9.33823071655E-06 #0.15/longitud cromosoma         # MUTATION PROBABILITY (BY CHROMOSOME??)
+ pE: 0.01                                               # ERASURE PROBABILITY
+ verbose: True                                          # SHOW EVOLUTION DETAILS
+ comments: 'Sin brecha generacional'
