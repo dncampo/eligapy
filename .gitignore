@@ -106,4 +106,5 @@ venv.bak/
 # my very own ignored files and folders for this project
 data/
 out/
+.idea/
 
