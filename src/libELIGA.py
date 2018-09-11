@@ -1111,9 +1111,9 @@ class Settings(dict):
             settings = yaml.load(f)
         #f.close()
         
-        
         for key,value in settings.items():
             self[key] = value
+
 #==============================================================================
 
 

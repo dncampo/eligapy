@@ -1,0 +1,30 @@
+---
+ NAME: Experiment_02                                    # EXPERIMENT NAME
+ CompleteDataSet: ../data/leukemia_complete_small.csv   # COMPLETE DATASET USED FOR TRAINING, TESTING AND VALIDATE CLASSIFIER
+ TrainData: data/leukemia_train_train.csv               # DATA USED FOR TRAINING CLASSIFIER
+ TestData: data/leukemia_train_valid.csv                # DATA USED FOR TESTING CLASSIFIER
+ ValidationData: data/leukemia_test_34x7129.csv         # DATA USED FOR VALIDATE CLASSIFIER
+ NCORES: 4                                              # NUMBER OF CORES
+ Nindiv: 50                                             # POPULATION SIZE
+ K: 4                                                   # NUMBER OF INDIVIDUALS FOR TOURNAMENT
+ maxIterations: 5                                       # MAXIMUM NUMBER OF ITERATIONS
+ alpha: 0.8                                             # PESO DEL "UAR" EN LA FUNCION DE FITNESS
+ Np2x: 40                                               # NUMBER OF PARENTS TO CROSS  < no se usa >
+ Ngap: 10                                               # GENERATIONAL GAP
+ Nchild: 39                                             # OFFSPRING SIZE
+ pF: 0.03                                               # PROBABILITY OF INCLUDE EACH FEATURE IN THE INITIALIZATION
+ px: 0.90                                               # CROSSOVER PROBABILITY
+ pm: 0.1                                                # MUTATION PROBABILITY (BY CHROMOSOME??)
+ gamma_initial: 10.0                                    #
+ gamma_final: 0.1                                       #
+ verbose: True                                          # SHOW EVOLUTION DETAILS
+ Plot_measures: True
+ comments: Con brecha generacional
+ Nsubpop: 0 # 3
+ Subpop_Gmax: 70
+ Subpop_Gwait: 5
+ Subpop_Nindiv: 30
+ Subpop_Np2x: 10
+ Subpop_Ngap: 10
+ Subpop_Nchild: 19
+ Replacement: Reemplazo Completo                           # Reemplazo Completo

@@ -9,25 +9,14 @@ Created on Thu Feb  5 15:26:02 2015
 
 
 def ELIGA(settings_file):
-    
-    #----------------------------
-    # IMPORTING MODULES
     import numpy as np
-    
     import matplotlib.pyplot as plt
-    
     import json, csv
-    
     import multiprocessing
-    
     import timeit
-    
     import libELIGA
-
     from sklearn import preprocessing
-
-    #    import matplotlib.pyplot as plt
-    
+    from sklearn.cross_validation import train_test_split
     #----------------------------
     # INITIALIZING
     tic = timeit.default_timer
@@ -62,79 +51,83 @@ def ELIGA(settings_file):
         jobs_server = ''
     else:
         jobs_server = multiprocessing.Pool(settings['NCORES']) # Multiprocessing or PATHOS
-
-
     time_settings = tic()
     loadig_parameters = time_settings - start_initialization
     print("Elapsed time: " + str(loadig_parameters) + " seconds\n")
-    
-    
+
+
+    # =====================
+    # LOAD COMPLETE DATASET
+    # =====================
+    print("Loading DATASET...")
+    name, ext = settings['CompleteDataSet'].split('/')[-1].split('.')
+    X_complete = []
+    Y_complete = []
+    with open(settings['CompleteDataSet'], 'r') as fp:
+        for row in csv.reader(fp):
+            X_complete.append(row[:-1])
+            Y_complete.append(row[-1])
+
+    #X_complete = np.array([X_complete], dtype=np.float64)
+    #Y_complete = np.array([Y_complete], dtype=np.float64)
+
+    X_train_2, X_test_2, Y_train_2, Y_test_2 = train_test_split(X_complete, Y_complete, test_size = 0.33, random_state = 42)
+    X_train_2 = np.array([X_train_2], dtype=np.float64)
+    Y_train_2 = np.array([Y_train_2], dtype=np.int8)
+    X_test_2 = np.array([X_test_2], dtype=np.float64)
+    Y_test_2 = np.array([Y_test_2], dtype=np.int8)
+    #Nfeatures = len(X_train_2[0])
     #=====================
     # LOAD TRAINING DATA
     #=====================
     print("Loading TRAINING DATA...")
-    name,ext = settings['TrainData'].split('/')[-1].split('.')
-    
     X_train = []
     Y_train = []
     with open(settings['TrainData'], 'r') as fp:
         for row in csv.reader(fp):
-            
             X_train.append(row[:-1])
             Y_train.append(row[-1])
-    
     Nfeatures = len(X_train[0])
-    
+    print(len(X_train[0]))
     X_train = np.array([X_train],dtype=np.float64)
-    Y_train = np.array([Y_train],dtype=np.float64)
-
+    Y_train = np.array([Y_train],dtype=np.int8)
 
     time_train = tic()
     loading_train = time_train - time_settings
     print("Elapsed time: " + str(loading_train) + " seconds\n")
-    
+
 
     #=====================
     # LOAD TEST DATA
     #=====================
     print("Loading TEST DATA...")
-    name,ext = settings['TestData'].split('/')[-1].split('.')
-    
+
     X_test = []
     Y_test = []
     with open(settings['TestData'], 'r') as fp:
         for row in csv.reader(fp):
-            
             X_test.append(row[:-1])
             Y_test.append(row[-1])
-    
     X_test = np.array([X_test],dtype=np.float64)
-    Y_test = np.array([Y_test],dtype=np.float64)
-    
+    Y_test = np.array([Y_test],dtype=np.int8)
+
     time_test = tic()
     loading_test = time_test - time_train
     print("Elapsed time: " + str(loading_test) + " seconds\n")
-    
-    
-    
+
+
     #=====================
     # LOAD VALIDATION DATA
     #=====================
     print("Loading VALIDATION DATA...")
-    
-    name,ext = settings['ValidationData'].split('/')[-1].split('.')
-    
     X_validation = []
     Y_validation = []
     with open(settings['ValidationData'], 'r') as fp:
         for row in csv.reader(fp):
-            
             X_validation.append(row[:-1])
             Y_validation.append(row[-1])
-    
     X_validation = np.array([X_validation],dtype=np.float64)
-    Y_validation = np.array([Y_validation],dtype=np.float64)
-    
+    Y_validation = np.array([Y_validation],dtype=np.int8)
     time_test = tic()
     loading_test = time_test - time_train
     print("Elapsed time: " + str(loading_test) + " seconds\n")
@@ -145,10 +138,10 @@ def ELIGA(settings_file):
 
     # conviene escalar los datos completos una unica vez previo a la evolucion \
     # de manera evitar este calculo en cada evaluacion de fitness
-    for j in range(X_train.shape[0]):
-        scaler = preprocessing.StandardScaler().fit(X_train[j])
-        X_train[j] = scaler.transform(X_train[j])
-        X_test[j] = scaler.transform(X_test[j])
+    for j in range(X_train_2.shape[0]):
+        scaler = preprocessing.StandardScaler().fit(X_train_2[j])
+        X_train_2[j] = scaler.transform(X_train_2[j])
+        X_test_2[j] = scaler.transform(X_test_2[j])
         X_validation[j] = scaler.transform(X_validation[j])
 
     
@@ -179,7 +172,7 @@ def ELIGA(settings_file):
     # INITIALIZING ANTHILL - N CPUs ---> MULTIPROCESSING
     print('Inicializando...\n')
     #population.initialize(method='random')
-    population.initialize(method='relief', features=X_train, labels=Y_train)
+    population.initialize(method='relief', features=X_train_2, labels=Y_train_2)
     #---------------------------------------------------
     
     
@@ -194,7 +187,7 @@ def ELIGA(settings_file):
     #---------------------------------------------------
     # EVALUATE POPULATION ---> PODRIA PARALELIZARSE??
     print('Evaluando población...\n')
-    fitness = population.evaluate(X_train, Y_train, X_test, Y_test, jobs_server, show=True)
+    fitness = population.evaluate(X_train_2, Y_train_2, X_test_2, Y_test_2, jobs_server, show=True)
     
     
     MEASURES.update(key='features', values=fitness['features'], idx_elite=population.elite_idx)
@@ -223,7 +216,7 @@ def ELIGA(settings_file):
     #= = = = = = = = = = = = = = = = = = = = = = = = = = =
     
     
-    fitness = population.evaluate(X_train, Y_train, X_test, Y_test, jobs_server, show=True)
+    fitness = population.evaluate(X_train_2, Y_train_2, X_test_2, Y_test_2, jobs_server, show=True)
     
     MEASURES.G = 1
     
@@ -274,7 +267,7 @@ def ELIGA(settings_file):
                 subpopulation[0].chromosome = [1] * len(subpopulation[0].chromosome)
                 
                 # EVALUATE SUBPOPULATION
-                fitness = subpopulation.evaluate(X_train, Y_train, X_test, Y_test, jobs_server, show=True)
+                fitness = subpopulation.evaluate(X_train_2, Y_train_2, X_test_2, Y_test_2, jobs_server, show=True)
                 
                 
                 SUBPOP_MEASURES.G = 1
@@ -326,9 +319,9 @@ def ELIGA(settings_file):
                     # EVALUATE NEW POPULATION
                     #---------------------------------------------------
                     if settings['verbose']:
-                        subpop_fitness = subpopulation.evaluate(X_train, Y_train, X_test, Y_test, jobs_server, show=True)
+                        subpop_fitness = subpopulation.evaluate(X_train_2, Y_train_2, X_test_2, Y_test_2, jobs_server, show=True)
                     else:
-                        subpop_fitness = subpopulation.evaluate(X_train, Y_train, X_test, Y_test, jobs_server, show=False)
+                        subpop_fitness = subpopulation.evaluate(X_train_2, Y_train_2, X_test_2, Y_test_2, jobs_server, show=False)
                     
                     
                     SUBPOP_MEASURES.update(key='features',
@@ -695,9 +688,9 @@ def ELIGA(settings_file):
         # EVALUATE NEW POPULATION
         #---------------------------------------------------
         if settings['verbose']:
-            fitness = population.evaluate(X_train, Y_train, X_test, Y_test, jobs_server, show=True)
+            fitness = population.evaluate(X_train_2, Y_train_2, X_test_2, Y_test_2, jobs_server, show=True)
         else:
-            fitness = population.evaluate(X_train, Y_train, X_test, Y_test, jobs_server, show=False)
+            fitness = population.evaluate(X_train_2, Y_train_2, X_test_2, Y_test_2, jobs_server, show=False)
         
         
         MEASURES.update(key='features', values=fitness['features'], idx_elite=population.elite_idx)
@@ -765,13 +758,13 @@ def ELIGA(settings_file):
     #--------------------
     # VALIDATION
     #--------------------
-    X_train = np.array([np.vstack([X_train[0],X_test[0]])])
-    Y_train = np.hstack([Y_train,Y_test])
+    X_train_2 = np.array([np.vstack([X_train_2[0],X_test_2[0]])])
+    Y_train_2 = np.hstack([Y_train_2,Y_test_2])
     
     elite, null = population.get_elite(N=1)
     elite = elite[0]
     elite.modified = True
-    elite.evaluate(X_train, Y_train, X_validation, Y_validation)
+    elite.evaluate(X_train_2, Y_train_2, X_validation, Y_validation)
     
     print('-----------------------------')
     print('MEDIDAS --- VALIDACION')
@@ -805,7 +798,7 @@ if __name__ == "__main__":
     '''
     Example:
         
-        python3 eliga.py -settings SETTINGS_eliga.yaml
+       elSETTINGS_eliga.yaml
     '''
     
     import sys
@@ -814,11 +807,8 @@ if __name__ == "__main__":
     settings = 'SETTINGS_eliga_leuk.yaml'
     
     for ii in range(1,len(sys.argv),2):
-        
         if sys.argv[ii] == '-settings':
-            settings = sys.argv[ii+1]
-        
+            settings = sys.argv[ii+1]        
         else:
            print('Parámetro desconocido.')
-
     ELIGA(settings)
